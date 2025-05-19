@@ -1,52 +1,47 @@
 <x-app-layout>
-    <div class="min-h-screen flex items-center justify-center bg-white dark:bg-gray-900 px-4">
-        <div class="w-full max-w-md bg-gray-100 dark:bg-gray-800 p-6 rounded-lg shadow-lg">
-            <h1 class="text-2xl font-bold mb-6 text-center text-gray-800 dark:text-white">Iniciar Sesión</h1>
 
-            <form method="POST" action="{{ route('login.store') }}" class="space-y-5">
-                @csrf
-
-                <div>
-                    <label for="email" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                        Correo
-                    </label>
-                    <input
-                        type="text"
-                        name="email"
-                        id="email"
-                        value="{{ old('email') }}"
-                        class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    >
-                    @error('email')
-                        <small class="text-red-600 dark:text-red-400">{{ $message }}</small>
-                    @enderror
-                </div>
-
-                <div>
-                    <label for="password" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                        Contraseña
-                    </label>
-                    <input
-                        type="password"
-                        name="password"
-                        id="password"
-                        value="{{ old('password') }}"
-                        class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    >
-                    @error('password')
-                        <small class="text-red-600 dark:text-red-400">{{ $message }}</small>
-                    @enderror
-                </div>
-
-                <div>
-                    <button
-                        type="submit"
-                        class="w-full py-2 px-4 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-md shadow transition duration-200"
-                    >
-                        Entrar
-                    </button>
-                </div>
-            </form>
-        </div>
+    @if (session('success'))
+    <div class="mb-4 px-4 py-2 bg-green-100 border border-green-300 text-green-800 rounded">
+        {{ session('success') }}
     </div>
-</x-app-layout>
+    @endif
+
+    @if (session('error'))
+    <div class="mb-4 px-4 py-2 bg-red-100 border border-red-300 text-red-800 rounded">
+        {{ session('error') }}
+    </div>
+    @endif
+
+
+
+    <div class="max-w-md mx-auto mt-10 p-6 bg-white border border-gray-200 rounded shadow">
+        <h1 class="text-xl font-bold mb-6 text-center">Iniciar Sesión</h1>
+
+        <form method="POST" action="{{ route('login.store') }}">
+            @csrf
+
+            <label class="block mb-4">
+                <span class="block mb-1 font-medium">Correo:</span>
+                <input type="text" name="email" value="{{ old('email') }}"
+                    class="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring focus:ring-blue-200">
+                @error('email')
+                    <small class="text-red-500">{{ $message }}</small>
+                @enderror
+            </label>
+
+            <label class="block mb-6">
+                <span class="block mb-1 font-medium">Contraseña:</span>
+                <input type="password" name="password"
+                    class="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring focus:ring-blue-200">
+                @error('password')
+                    <small class="text-red-500">{{ $message }}</small>
+                @enderror
+            </label>
+
+            <button type="submit"
+                class="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700 transition duration-200">
+                Entrar
+            </button>
+        </form>
+    </div>
+    </x-app-layout>

@@ -6,6 +6,8 @@ use App\Http\Controllers\AppointmentController;
 use App\Http\Controllers\PatientController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Prueba;
+
+use App\Http\Middleware\EnsureDoctorIsActive;
 use App\Models\Appointment;
 use Illuminate\Support\Facades\Route;
 
@@ -17,9 +19,11 @@ Route::get('/', function () {
 
 Route::get('/login', [LoginController::class, 'create'])->name('login');
 
-Route::post('/login', [LoginController::class, 'store'])->name('login.store');
+Route::post('/login', [LoginController::class, 'store'])->name('login.store')
+//->middleware(EnsureDoctorIsActive::class)
+;
 
-Route::get('/logout', [LoginController::class, 'destroy'])->name('logout');
+Route::post('/logout', [LoginController::class, 'destroy'])->name('logout');
 
 Route::get('/registro', function () {
     return view('register.choice');})->name('registro');
@@ -41,15 +45,20 @@ Route::put('/actualizar-cita/{appointment}', [AppointmentController::class, 'upd
 
 Route::get('info-usuario',[ProfileController::class, 'edit'])->name('profile.edit');
 Route::put('info-usuario/update',[ProfileController::class, 'updateInfo'])->name('profile.update');
-Route::put('info-usuario/update-password',[ProfileController::class, 'updatePassword'])->name('profile.password');
+Route::put('info-usuario/update-password',[ProfileController::class, 'updatePasswordPost'])->name('profile.password');
 
 require __DIR__.'/patient.php';
 require __DIR__.'/doctor.php';
 
+// routes/web.php
 
+use App\Http\Controllers\AdminDoctorController;
 
-
-
+Route::middleware(['auth', 'role:admin'])->group(function () {
+    Route::get('/admin/doctors', [AdminDoctorController::class, 'index'])->name('admin.doctors.index');
+    Route::post('/admin/doctors/{doctor}/toggle', [AdminDoctorController::class, 'toggleActive'])->name('admin.doctors.toggle');
+    Route::delete('/admin/doctors/{doctor}', [AdminDoctorController::class, 'destroy'])->name('admin.doctors.destroy');
+});
 
 
 

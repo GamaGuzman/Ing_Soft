@@ -1,26 +1,47 @@
 <x-app-layout>
-    <h2>Editar cita médica</h2>
+        <x-nav-app>
 
-    <form method="POST" action="{{ route('appointments.update', $appointment->id) }}">
-        @csrf
-        @method('PUT')
+    </x-nav-app>
 
-        <label for="datepicker">Nueva fecha y hora:</label>
-        <input type="text" id="datepicker" name="appointment_datetime"
-               value="{{ \Carbon\Carbon::parse($appointment->date)->format('Y-m-d H:i') }}" required>
+    <div class="max-w-3xl mx-auto mt-10 px-4 space-y-6">
 
-        <button type="submit">Actualizar cita</button>
-    </form>
+        <h2 class="text-3xl font-bold text-gray-800">Editar cita médica</h2>
+
+        <form method="POST" action="{{ route('appointments.update', $appointment->id) }}" class="bg-white shadow p-6 rounded-xl space-y-4 border border-gray-200">
+            @csrf
+            @method('PUT')
+
+            <div>
+                <label for="datepicker" class="block text-sm font-medium text-gray-700">Nueva fecha y hora:</label>
+                <input type="text" id="datepicker" name="appointment_datetime"
+                       value="{{ \Carbon\Carbon::parse($appointment->date)->format('Y-m-d H:i') }}"
+                       class="mt-1 w-full border-gray-300 rounded-lg shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-200"
+                       required>
+            </div>
+
+            <button type="submit"
+                    class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-xl">
+                Actualizar cita
+            </button>
+        </form>
+
+        @if ($errors->any())
+            <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-xl">
+                <ul class="list-disc pl-5">
+                    @foreach ($errors->all() as $error)
+                        <li>{{ $error }}</li>
+                    @endforeach
+                </ul>
+            </div>
+        @endif
+
+    </div>
 
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     <script>
         let days = @json($days);
         let dayTimeMap = @json($dayTimeMap);
         let dayMaxTimeMap = @json($dayMaxTimeMap);
-
-        console.log("Días disponibles:", days);
-        console.log("Horas mínimas:", dayTimeMap);
-        console.log("Horas máximas:", dayMaxTimeMap);
 
         flatpickr("#datepicker", {
             enableTime: true,
@@ -46,16 +67,4 @@
             }
         });
     </script>
-
-
-    @if ($errors->any())
-        <div class="alert alert-danger">
-            <ul>
-                @foreach ($errors->all() as $error)
-                    <li>{{ $error }}</li>
-                @endforeach
-            </ul>
-        </div>
-    @endif
-
 </x-app-layout>

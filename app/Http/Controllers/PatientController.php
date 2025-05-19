@@ -20,26 +20,28 @@ class PatientController extends Controller
         return view('register.patient');
     }
 
-    public function store(UserRequest $request, PatientRequest $patientRequest)
-    {
-        $user = User::create([
-            'name' => $request->name,
-            'email' => $request->email,
-            'password' =>  bcrypt($request->password),
-            'phone' => $request->phone,
-            'confirmed_password' => bcrypt($request->password_confirmation),
-        ]);
+  public function store(UserRequest $request)
+{
 
-        Patient::create([
-            'user_id' => $user->id,
-            'age' => $patientRequest->age,
-            ]
-        );
 
-        //Asignar rol de paciente
-        $rolePatient= Role::where('name', 'patient')->first();
-        $user->assignRole($rolePatient);
+    $user = User::create([
+        'name' => $request->name,
+        'email' => $request->email,
+        'password' => bcrypt($request->password),
+        'phone' => $request->phone,
+        'confirmed_password' => bcrypt($request->password_confirmation),
+    ]);
 
-        return redirect()->route('login');
-    }
+    Patient::create([
+        'user_id' => $user->id,
+        'age' => $request->age,
+    ]);
+
+    $rolePatient = Role::where('name', 'patient')->first();
+    $user->assignRole($rolePatient);
+
+    return redirect()->route('login')
+        ->with('success', 'Usuario registrado correctamente. Por favor, inicie sesión.');
+}
+
 }

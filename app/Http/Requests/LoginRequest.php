@@ -37,20 +37,36 @@ class LoginRequest extends FormRequest
      *
      * @throws \Illuminate\Validation\ValidationException
      */
-    public function authenticate(): void
-    {
-        $this->ensureIsNotRateLimited();
+public function authenticate(): void
+{
+    $this->ensureIsNotRateLimited();
 
-        if (! Auth::attempt($this->only('email', 'password'), $this->boolean('remember'))) {
-            RateLimiter::hit($this->throttleKey());
+    $user = \App\Models\User::where('email', $this->email)->first();
 
-            throw ValidationException::withMessages([
-                'email' => trans('auth.failed'),
-            ]);
-        }
-
-        RateLimiter::clear($this->throttleKey());
+    if (! $user) {
+        RateLimiter::hit($this->throttleKey());
+        throw ValidationException::withMessages([
+            'email' => 'El correo electrónico no está registrado en el sistema.',
+        ]);
     }
+
+    if (! \Illuminate\Support\Facades\Hash::check($this->password, $user->password)) {
+        RateLimiter::hit($this->throttleKey());
+        throw ValidationException::withMessages([
+            'password' => 'La contraseña ingresada es incorrecta.',
+        ]);
+    }
+
+    if (! Auth::attempt($this->only('email', 'password'), $this->boolean('remember'))) {
+        RateLimiter::hit($this->throttleKey());
+        throw ValidationException::withMessages([
+            'email' => 'Las credenciales no son válidas.',
+        ]);
+    }
+
+    RateLimiter::clear($this->throttleKey());
+}
+
 
     /**
      * Ensure the login request is not rate limited.

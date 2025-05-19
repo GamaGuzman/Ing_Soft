@@ -22,7 +22,17 @@ class PatientRequest extends FormRequest
     public function rules(): array
     {
         return [
-            //
+            "age" => "required|integer|min:0|max:99"
+        ];
+    }
+
+    public function messages()
+    {
+        return [
+            "age.required" => "El campo edad es requerido.",
+            "age.integer" => "El campo edad debe ser un número entero.",
+            "age.min" => "La edad no puede ser menor a 0.",
+            "age.max" => "La edad no puede ser mayor a 99."
         ];
     }
 }

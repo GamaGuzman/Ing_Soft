@@ -13,57 +13,50 @@ use Carbon\Carbon as Carbon;
 
 class AppointmentController extends Controller
 {
-    public function index()
-    {
+public function index()
+{
+    $user_name = Auth::user()->name;
+    $user_rol = User::where('id', Auth::id())->first()
+        ->getRoleNames()->first();
 
-        //Primero conseguimos el id del usuario logueado y su rol
-        $user_name = Auth::user()->name;
-        $user_rol = User::where('id', Auth::id())->first()
-            ->getRoleNames()->first();
+    if ($user_rol == 'patient') {
+        $patient_id = Patient::where('user_id', Auth::id())->first()->id;
+        $raw_appointments = Appointment::where('patient_id', $patient_id)
+            ->orderByRaw('DAY(date), HOUR(date)')
+            ->get();
 
-        //Luego buscamos las citas del paciente
-        if ($user_rol == 'patient') {
-            $patient_id = Patient::where('user_id', Auth::id())->first()->id;
-            $raw_appointments = Appointment::where('patient_id', $patient_id)
-                ->orderByRaw('DAY(date), HOUR(date)')
-                ->get();
+        $appointments = $raw_appointments->isEmpty() ? [] : $raw_appointments->map(function ($raw_appointment) {
+            return [
+                'id' => $raw_appointment->id,
+                'date' => Carbon::parse($raw_appointment->date)->format('d/m/Y'),
+                'hour' => Carbon::parse($raw_appointment->date)->format('H:i'),
+                'office' => $raw_appointment->office,
+            ];
+        });
 
-            //Luego preparamos los datos para la vista index
-            if ($raw_appointments->isEmpty()) {
-                $appointments = [];
-            } else {
-                $appointments = $raw_appointments->map(function ($raw_appointment) {
-                    return [
-                        'id' => $raw_appointment->id,
-                        'date' => Carbon::parse($raw_appointment->date)->format('d/m/Y'),
-                        'hour' => Carbon::parse($raw_appointment->date)->format('H:i'),
-                        'office' => $raw_appointment->office,
-                    ];
-                });
-            }
-        }else if($user_rol =='doctor'){
-            $doctor_id = Doctor::where('user_id', Auth::id())->first()->id;
-            $raw_appointments = Appointment::where('doctor_id', $doctor_id)
-                ->orderByRaw('DAY(date), HOUR(date)')
-                ->get();
+    } elseif ($user_rol == 'doctor') {
+        $doctor_id = Doctor::where('user_id', Auth::id())->first()->id;
+        $raw_appointments = Appointment::where('doctor_id', $doctor_id)
+            ->orderByRaw('DAY(date), HOUR(date)')
+            ->get();
 
-            //Luego preparamos los datos para la vista index
-            if ($raw_appointments->isEmpty()) {
-                $appointments = [];
-            } else {
-                $appointments = $raw_appointments->map(function ($raw_appointment) {
-                    return [
-                        'id' => $raw_appointment->id,
-                        'date' => Carbon::parse($raw_appointment->date)->format('d/m/Y'),
-                        'hour' => Carbon::parse($raw_appointment->date)->format('H:i'),
-                        'office' => $raw_appointment->office,
-                    ];
-                });
-            }
-        }
+        $appointments = $raw_appointments->isEmpty() ? [] : $raw_appointments->map(function ($raw_appointment) {
+            return [
+                'id' => $raw_appointment->id,
+                'date' => Carbon::parse($raw_appointment->date)->format('d/m/Y'),
+                'hour' => Carbon::parse($raw_appointment->date)->format('H:i'),
+                'office' => $raw_appointment->office,
+            ];
+        });
 
-        return view('dashboard', compact('user_name', 'user_rol', 'appointments'));
+    } else {
+        // Si el rol no es ni patient ni doctor, redirigir o mostrar algo neutral
+        return redirect()->route('login')->with('error', 'Rol no autorizado para ver el dashboard.');
     }
+
+    return view('dashboard', compact('user_name', 'user_rol', 'appointments'));
+}
+
 
     public function create(Request $request)
     {
@@ -194,6 +187,8 @@ class AppointmentController extends Controller
         $appointmentRaw = Appointment::findOrFail($id);
         $doctor_id = Doctor::where('id', $appointmentRaw->doctor_id)
         ->first()->user_id;
+        $patient_id = Patient::where('id', $appointmentRaw->patient_id)
+        ->first()->user_id;
 
         $appointment = [
             'id' => $appointmentRaw->id,
@@ -201,6 +196,7 @@ class AppointmentController extends Controller
             'hour' => Carbon::parse($appointmentRaw->date)->format('H:i'),
             'office' => $appointmentRaw->office,
             'doctor' => User::where('id', $doctor_id)->first()->name,
+            'patient' => User::where('id', $patient_id)->first()->name,
         ];
         return view('appointments.show', compact('appointment', 'appointmentRaw'));
     }

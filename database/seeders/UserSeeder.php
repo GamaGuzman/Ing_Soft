@@ -21,6 +21,8 @@ class UserSeeder extends Seeder
         Permission::create(["name" => "editar cita"]);
         Permission::create(["name" => "eliminar cita"]);
 
+        Permission::create(["name" => "gestionar doctores"]);
+
         $patientUser = User::create([
             'name' => 'patient',
             'email' => 'paciente@gmail.com',
@@ -47,6 +49,19 @@ class UserSeeder extends Seeder
         $roleDoctor = Role::create(["name" => "doctor"]);
         $doctorUser->assignRole($roleDoctor);
         $roleDoctor->syncPermissions(['ver cita','editar cita']);
+
+        $adminUser= User::create([
+            'name' => 'Juan Pozos',
+            'email'=> 'pozitos@gmail.com',
+            'password' => bcrypt('12345678'),
+            'confirmed_password' => bcrypt('12345678'),
+            'phone' => '1234567890',
+            'email_verified_at' => now(),
+        ]);
+
+        $roleAdmin = Role::create(["name" => "admin"]);
+        $adminUser->assignRole($roleAdmin);
+        $roleAdmin->syncPermissions(["gestionar doctores"]);
 
     }
 }

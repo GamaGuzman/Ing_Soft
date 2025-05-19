@@ -15,7 +15,7 @@ class DoctorController extends Controller
         return view('register.doctor');
     }
 
-    public function store(UserRequest $request, DoctorRequest $doctorRequest){
+    public function store(DoctorRequest $request){
 
         //guardar en la BDD el usuario
         $user = User::create([
@@ -29,11 +29,11 @@ class DoctorController extends Controller
         //Guardar en la BDD el doctor
         Doctor::create([
             'user_id' => $user->id,
-            'field' => $doctorRequest->field,
-            'speciality' => $doctorRequest->speciality,
-            'age' => $doctorRequest->age,
-            'rfc' => $doctorRequest->rfc,
-            'office_address' => $doctorRequest->office,
+            'field' => $request->field,
+            'speciality' => $request->speciality,
+            'age' => $request->age,
+            'rfc' => $request->rfc,
+            'office_address' => $request->office,
         ]);
 
         //Preparar los datos para guardarlos en los horario correspondientes

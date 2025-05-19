@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Middleware\EnsureDoctorIsActive;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\DoctorController;
 
